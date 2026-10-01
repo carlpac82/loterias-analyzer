@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Loterias Analyzer</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4f6fb"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--line:#e7ebf3;--txt:#0f172a;--muted:#64748b;--em:#2563eb;--ed:#7c3aed;--gold:#f59e0b;--green:#16a34a;--red:#dc2626;--amber:#b45309;--r:18px}
+*{box-sizing:border-box}html{-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",sans-serif}
+main{max-width:1040px;margin:auto;padding:28px 20px 60px}
+h1{font-size:22px;margin:0;letter-spacing:-.02em}h2{font-size:16px;margin:0 0 14px;letter-spacing:-.01em}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:12px;box-shadow:0 2px 8px rgba(15,23,42,.12)}.sub{color:var(--muted);font-size:13px}
+.status{font-size:13px;color:var(--muted);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px}
+.seg{display:inline-flex;background:#e9edf5;border-radius:12px;padding:4px;gap:2px;margin-bottom:20px}
+.seg button{border:0;background:transparent;padding:9px 18px;border-radius:9px;font:600 14px inherit;font-family:inherit;color:var(--muted);cursor:pointer}
+.seg button.active{background:var(--card);color:var(--txt);box-shadow:0 1px 3px rgba(15,23,42,.12)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin:0 0 16px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid>.card,.grid>div>.card{margin:0}.grid+.card,.grid+.grid,.card+.grid{margin-top:16px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.toolbar{display:flex;align-items:center;gap:22px;flex-wrap:wrap}.toolbar .actions{margin-left:auto;display:flex;gap:10px}
+.field{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}.stepper button{border:0;background:#f8fafc;width:34px;height:36px;font-size:18px;cursor:pointer;color:var(--txt)}.stepper input{width:44px;height:36px;border:0;text-align:center;font:600 15px inherit;font-family:inherit;color:var(--txt);-moz-appearance:textfield}.stepper input::-webkit-inner-spin-button{display:none}
+.switch{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none}.switch input{display:none}.switch span{width:38px;height:22px;background:#cbd5e1;border-radius:999px;position:relative;transition:.2s}.switch span:after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.switch input:checked+span{background:var(--em)}.switch input:checked+span:after{left:19px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--txt);padding:10px 16px;border-radius:10px;font:600 14px inherit;font-family:inherit;cursor:pointer}.btn:hover{background:#f8fafc}.btn.primary{background:var(--txt);border-color:var(--txt);color:#fff}.btn.primary:hover{background:#1e293b}.btn.link{border:0;background:none;color:var(--red);padding:4px 0;font-weight:500}
+.toast{min-height:22px;margin:-6px 0 10px;font-size:14px;color:var(--green);font-weight:600}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:780px){.games{grid-template-columns:1fr}}
+.game{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;border-top:4px solid var(--em)}.game.dream{border-top-color:var(--ed)}
+.game-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}.game-h h2{margin:0;font-size:18px}
+.draw{padding:16px 0;border-top:1px solid var(--line)}.draw:first-of-type{border-top:0}
+.when{display:flex;gap:8px;align-items:baseline;margin-bottom:10px}.when b{text-transform:capitalize;font-size:15px}.when span{color:var(--muted);font-size:13px}
+.line{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0}.line .ticket{margin:0}
+.summary{margin:16px 2px 0;color:var(--muted);font-size:14px}
+.ticket{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.ball{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;background:#eef2ff;color:var(--em);border:1.5px solid #c7d2fe}
+.dream .ball:not(.dream){background:#f5f3ff;color:var(--ed);border-color:#ddd6fe}
+.ball.star{background:linear-gradient(145deg,#fbbf24,#f59e0b);color:#fff;border:0;box-shadow:0 2px 6px rgba(245,158,11,.35)}
+.ball.dream{background:linear-gradient(145deg,#a78bfa,#7c3aed);color:#fff;border:0;box-shadow:0 2px 6px rgba(124,58,237,.35)}
+.ball.sm{width:30px;height:30px;font-size:12px;border-width:1px}
+.chips{display:flex;flex-wrap:wrap;gap:12px}.chip{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:44px}.chip small{color:var(--muted);font-size:11px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}@media(max-width:780px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}.kpi span{display:block;color:var(--muted);font-size:13px}.kpi b{font-size:26px;letter-spacing:-.02em}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.card-h h2{margin:0}
+.bet{display:grid;grid-template-columns:110px 96px 1fr auto;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.bet:first-child{border-top:0}.bet .ticket{margin:0;gap:5px}
+@media(max-width:780px){.bet{grid-template-columns:1fr 1fr}.bet .ticket{grid-column:1/-1}}
+.gpill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#eef2ff;color:var(--em);justify-self:start}.gpill.dream{background:#f5f3ff;color:var(--ed)}
+.badge{font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;background:#f1f5f9;color:var(--muted);white-space:nowrap}.badge.win{background:#dcfce7;color:var(--green)}.badge.wait{background:#fef3c7;color:var(--amber)}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+.metric{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}.metric:last-child{border:0}.metric span{color:var(--muted)}
+.table{width:100%;border-collapse:collapse;font-size:13px}.table th{color:var(--muted);font-weight:600}.table th,.table td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+.tag{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f5f9;margin:3px;font-size:12px}
+.muted{color:var(--muted)}.small{font-size:12.5px;color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.hidden{display:none!important}
+details.adv{padding:0}details.adv>summary{list-style:none;cursor:pointer;padding:18px 22px;font-weight:600;display:flex;justify-content:space-between}details.adv>summary::-webkit-details-marker{display:none}details.adv>summary:after{content:"+";color:var(--muted);font-size:18px}details.adv[open]>summary:after{content:"−"}details.adv>.inner{padding:0 22px 22px}details.adv h3{font-size:14px;margin:22px 0 8px}
+.note{color:var(--muted);font-size:13px;text-align:center;margin-top:28px}
+button,input{-webkit-tap-highlight-color:transparent}
+@media(max-width:560px){
+main{padding:max(16px,env(safe-area-inset-top)) 12px 40px}.top{margin-bottom:14px}.status{font-size:12px;padding:6px 12px;width:100%;text-align:center}
+.seg{display:flex;width:100%}.seg button{flex:1;padding:10px 6px;font-size:13px}
+.card,.game{padding:16px;border-radius:16px}.toolbar{gap:14px}.toolbar .actions{margin-left:0;width:100%}.toolbar .actions .btn{flex:1;padding:12px}
+.ball{width:34px;height:34px;font-size:14px}.ticket{gap:6px}.line{gap:10px}.chips{gap:8px}.chip{min-width:38px}
+.kpi{padding:14px}.kpi b{font-size:22px}.badge{white-space:normal}.table{font-size:11.5px}.table th,.table td{padding:7px 4px}details.adv>.inner{padding:0 14px 16px;overflow-x:auto}
+}
+@media(max-width:380px){.ball{width:31px;height:31px;font-size:13px}.ticket{gap:5px}}
+</style></head><body><main>
+<header class="top">
+ <div class="brand"><img src="Loterias_Analyzer_Icon.png" class="logo" alt=""><div><h1>Loterias Analyzer</h1><div class="sub">Euromilhões · EuroDreams</div></div></div>
+ <div id="status" class="status">A carregar resultados…</div>
+</header>
+<nav class="seg" id="nav"><button data-v="vKeys" class="active">Chaves</button><button data-v="vBets">As minhas apostas</button><button data-v="vStats">Estatísticas</button></nav>
+
+<section id="vKeys">
+ <div class="card toolbar">
+  <div class="field">Apostas por sorteio<div class="stepper"><button id="minus">−</button><input id="nLines" type="number" min="1" max="50" value="1"><button id="plus">+</button></div></div>
+  <label class="switch"><input type="checkbox" id="hotDay"><span></span>Números que mais saem nesse dia</label>
+  <div class="actions"><button id="btnGen" class="btn">↻ Gerar novas</button><button id="btnSave" class="btn primary">Guardar como jogadas</button></div>
+ </div>
+ <div id="saveMsg" class="toast"></div>
+ <div id="genOut"></div>
+</section>
+
+<section id="vBets" class="hidden">
+ <div id="betSpend" class="kpis"></div>
+ <div class="card"><div class="card-h"><h2>Histórico de apostas</h2><button id="btnClear" class="btn link">Apagar tudo</button></div><div id="betList"></div></div>
+</section>
+
+<section id="vStats" class="hidden">
+ <div class="seg"><button id="tEuro" class="active">Euromilhões</button><button id="tDream">EuroDreams</button></div>
+ <section id="euro">
+  <div class="grid"><div class="card"><h2>Último sorteio</h2><div id="eLast"></div></div><div class="card"><h2>Resumo</h2><div id="eStats"></div></div></div>
+  <div class="grid"><div class="card"><h2>Mais frequentes</h2><div id="eHot"></div></div><div class="card"><h2>Há mais tempo sem sair</h2><div id="eCold"></div></div></div>
+  <div class="card"><h2>Por dia da semana</h2><div id="eDay"></div></div>
+  <details class="card adv"><summary>Análise avançada</summary><div class="inner">
+   <h3>Estrelas</h3><div id="eStars"></div>
+   <h3>Sugestões do motor de estratégias</h3><div class="grid"><div id="eNext"></div><div id="eNext2"></div></div>
+   <h3>Aposta que menos gente joga</h3><div id="eAC"></div>
+   <h3>Validação walk-forward</h3><div id="eVal"></div>
+  </div></details>
+ </section>
+ <section id="dream" class="hidden dream">
+  <div class="grid"><div class="card"><h2>Último sorteio</h2><div id="dLast"></div></div><div class="card"><h2>Resumo</h2><div id="dStats"></div></div></div>
+  <div class="grid"><div class="card"><h2>Mais frequentes</h2><div id="dHot"></div></div><div class="card"><h2>Há mais tempo sem sair</h2><div id="dCold"></div></div></div>
+  <div class="card"><h2>Por dia da semana</h2><div id="dDay"></div></div>
+  <details class="card adv"><summary>Análise avançada</summary><div class="inner">
+   <h3>Dream Number</h3><div id="dDream"></div>
+   <h3>Sugestões do motor de estratégias</h3><div class="grid"><div id="dNext"></div><div id="dNext2"></div></div>
+   <h3>Aposta que menos gente joga</h3><div id="dAC"></div>
+   <h3>Validação walk-forward</h3><div id="dVal"></div>
+  </div></details>
+ </section>
+ <details class="card adv"><summary>Qualidade dos dados</summary><div class="inner" id="audit"></div></details>
+</section>
+
+<p class="note">Todas as combinações têm a mesma probabilidade de sair — Euromilhões 1 em 139.838.160 · EuroDreams 1 em 19.191.900.<br>Esta app organiza as tuas apostas; não prevê resultados. Joga com moderação.</p>
+</main>
+<script>
+
+const $=x=>document.getElementById(x); let E=[],D=[];
+const PROFILES=[
+{name:'Equilíbrio',pair:.035,triple:.070,parity:2.4,lowhigh:2.1,sum:.50,amp:1.4,cons:2.5,finals:1.2,repeat:1.0,overlap:.12},
+{name:'Recência',pair:.025,triple:.050,parity:1.7,lowhigh:1.5,sum:.42,amp:1.0,cons:2.0,finals:.9,repeat:.8,overlap:.10},
+{name:'Estrutura',pair:.050,triple:.095,parity:3.8,lowhigh:3.0,sum:.85,amp:2.0,cons:3.8,finals:1.8,repeat:1.7,overlap:.14},
+{name:'Associação',pair:.085,triple:.145,parity:1.9,lowhigh:1.7,sum:.48,amp:1.1,cons:2.0,finals:.9,repeat:.9,overlap:.10}
+];
+function rng(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function fmt(s){let d=new Date(String(s).includes('T')?s:String(s)+'T12:00:00');return isNaN(d)?'DATA INDISPONÍVEL':d.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function balls(ns,cls=''){return '<div class="ticket">'+ns.map(n=>'<span class="ball '+cls+'">'+n+'</span>').join('')+'</div>'}
+function shuffle(pool,r){for(let i=pool.length-1;i>0;i--){let j=Math.floor(r()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}}
+function counts(draws,w,max,field='numbers'){let a=Array(max+1).fill(0);for(let d of draws.slice(-w)){let vals=d[field];if(!Array.isArray(vals))vals=vals==null?[]:[vals];for(let n of vals)if(n>=1&&n<=max)a[n]++}return a}
+function gaps(draws,max,field='numbers'){let g=Array(max+1).fill(draws.length);for(let i=draws.length-1;i>=0;i--){let vals=draws[i][field];if(!Array.isArray(vals))vals=vals==null?[]:[vals];for(let n of vals)if(n>=1&&n<=max&&g[n]===draws.length)g[n]=draws.length-1-i}return g}
+function pairs(draws,w,field='numbers'){let m=new Map();for(let d of draws.slice(-w)){let a=d[field]||[];for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++){let x=Math.min(a[i],a[j]),y=Math.max(a[i],a[j]),k=x+'-'+y;m.set(k,(m.get(k)||0)+1)}}return m}
+function triples(draws,w){let m=new Map();for(let d of draws.slice(-w)){let a=d.numbers||[];for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++)for(let k=j+1;k<a.length;k++){let x=[a[i],a[j],a[k]].sort((a,b)=>a-b).join('-');m.set(x,(m.get(x)||0)+1)}}return m}
+function euroStarPool(date){let t=new Date(date+'T12:00:00');if(t<new Date('2011-05-10T12:00:00'))return 9;if(t<new Date('2016-09-27T12:00:00'))return 11;return 12}
+function normalizeEuro(row){return {...row,numbers:(row.numbers||[]).map(Number).sort((a,b)=>a-b),stars:(row.stars||[]).map(Number).sort((a,b)=>a-b)}}
+function normalizeDream(row){return {...row,numbers:(row.numbers||[]).map(Number).sort((a,b)=>a-b),dream:Number(row.dream)}}
+function validateEuro(raw){let good=[],bad=0,dupes=0,seen=new Set();for(let r of raw){let x=normalizeEuro(r),k=x.date+'|'+x.numbers.join(',')+'|'+x.stars.join(',');let pool=euroStarPool(x.date);let ok=Array.isArray(x.numbers)&&x.numbers.length===5&&new Set(x.numbers).size===5&&x.numbers.every(n=>n>=1&&n<=50)&&Array.isArray(x.stars)&&x.stars.length===2&&new Set(x.stars).size===2&&x.stars.every(n=>n>=1&&n<=pool);if(seen.has(k)){dupes++;continue}seen.add(k);if(ok)good.push(x);else bad++}return{good,bad,dupes}}
+function validateDream(raw){let good=[],bad=0,dupes=0,seen=new Set();for(let r of raw){let x=normalizeDream(r),k=x.date+'|'+x.numbers.join(',')+'|'+x.dream;if(seen.has(k)){dupes++;continue}seen.add(k);let ok=x.numbers.length===6&&new Set(x.numbers).size===6&&x.numbers.every(n=>n>=1&&n<=40)&&Number.isInteger(x.dream)&&x.dream>=1&&x.dream<=5;if(ok)good.push(x);else bad++}return{good,bad,dupes}}
+function featureStats(draws,max,field='numbers'){return{f:counts(draws,draws.length,max,field),r10:counts(draws,10,max,field),r25:counts(draws,25,max,field),r50:counts(draws,50,max,field),r100:counts(draws,100,max,field),g:gaps(draws,max,field),p:pairs(draws,100,field),t:triples(draws,150)}}
+function numberScoreVector(s,draws,max,field='numbers'){let out=[];for(let n=1;n<=max;n++){let long=s.f[n]/Math.max(1,draws.length),rec=.45*s.r10[n]/10+.30*s.r25[n]/25+.18*s.r50[n]/50+.07*s.r100[n]/100,mom=s.r10[n]/10-s.r100[n]/100,g=Math.min(s.g[n],20)/20;out.push({n,score:6*long+1.65*rec+.55*mom+.28*g})}return out}
+function mainTicketScore(c,s,draws,p,max,previous=[]){let ns=numberScoreVector(s,draws,max).filter(x=>c.includes(x.n)).reduce((a,x)=>a+x.score,0),pc=0,tc=0;for(let i=0;i<c.length;i++)for(let j=i+1;j<c.length;j++)pc+=s.p.get(Math.min(c[i],c[j])+'-'+Math.max(c[i],c[j]))||0;for(let i=0;i<c.length;i++)for(let j=i+1;j<c.length;j++)for(let k=j+1;k<c.length;k++)tc+=s.t.get([c[i],c[j],c[k]].sort((a,b)=>a-b).join('-'))||0;let odd=c.filter(n=>n%2).length,low=c.filter(n=>n<=max/2).length,sum=c.reduce((a,b)=>a+b,0),amp=c.at(-1)-c[0],cons=0;for(let i=1;i<c.length;i++)if(c[i]===c[i-1]+1)cons++;let rep=c.filter(n=>draws.at(-1).numbers.includes(n)).length,finals=new Set(c.map(n=>n%10)).size,overlap=c.filter(n=>previous.includes(n)).length,pen=0;if(odd<2||odd>c.length-2)pen+=p.parity;if(low<2||low>c.length-2)pen+=p.lowhigh;if(sum<max*c.length*.32||sum>max*c.length*.68)pen+=p.sum;if(amp<max*.45)pen+=p.amp;if(cons>=3)pen+=p.cons*(cons-2);if(finals<=2)pen+=p.finals;if(rep>=4)pen+=p.repeat*(rep-3);pen+=p.overlap*overlap;return ns+p.pair*pc+p.triple*tc-pen}
+function drawMainCandidate(draws,max,p,seed,previous=[]){let s=featureStats(draws,max),r=rng(seed),best=null,bs=-Infinity,N=max===50?1400:1400;for(let t=0;t<N;t++){let pool=Array.from({length:max},(_,i)=>i+1);shuffle(pool,r);let c=pool.slice(0,max===50?5:6).sort((a,b)=>a-b),v=mainTicketScore(c,s,draws,p,max,previous)+r()*.001;if(v>bs){bs=v;best=c}}return{c:best,score:bs}}
+function starPool(draws){return Math.max(...draws.slice(-1).map(d=>euroStarPool(d.date)))||12}
+function starFeatures(draws,max){let f=Array(max+1).fill(0),ex=Array(max+1).fill(0),r10=counts(draws,10,max,'stars'),r25=counts(draws,25,max,'stars'),r50=counts(draws,50,max,'stars'),r100=counts(draws,100,max,'stars'),g=gaps(draws,max,'stars'),p=pairs(draws,100,'stars');for(let d of draws){let pool=euroStarPool(d.date);for(let n=1;n<=pool;n++)ex[n]++;for(let n of d.stars||[])if(n<=max)f[n]++}let v=[];for(let n=1;n<=max;n++){let long=ex[n]?f[n]/ex[n]:0,rec=.45*r10[n]/Math.max(1,Math.min(10,draws.length))+.30*r25[n]/Math.max(1,Math.min(25,draws.length))+.18*r50[n]/Math.max(1,Math.min(50,draws.length))+.07*r100[n]/Math.max(1,Math.min(100,draws.length)),mom=r10[n]/Math.max(1,Math.min(10,draws.length))-r100[n]/Math.max(1,Math.min(100,draws.length)),gap=Math.min(g[n],20)/20;v.push({n,score:6*long+1.65*rec+.55*mom+.28*gap})}return{v,p,g,ex,f}}
+function auxScorePair(draws,field,max,p){let pool=Array.from({length:max},(_,i)=>i+1),sf=field==='stars'?starFeatures(draws,max):null,s=sf?null:featureStats(draws,max,field),vec=sf?sf.v:numberScoreVector(s,draws,max,field),pair=sf?sf.p:s.p;let best=null,bs=-Infinity;for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++){let c=[pool[i],pool[j]],v=vec.filter(x=>c.includes(x.n)).reduce((a,x)=>a+x.score,0);v+=p.pair*(pair.get(pool[i]+'-'+pool[j])||0);if(v>bs){bs=v;best=c;}}return{c:best,score:bs}}
+function dreamAux(draws){let f=counts(draws,draws.length,5,'dream'),r10=counts(draws,10,5,'dream'),g=gaps(draws,5,'dream'),v=[];for(let n=1;n<=5;n++)v.push({n,score:6*f[n]/draws.length+1.7*r10[n]/10+.3*Math.min(g[n],20)/20});return v.sort((a,b)=>b.score-a.score)[0].n}
+function predict(draws,kind,seed,previous=[]){let max=kind==='euro'?50:40, bestP=PROFILES[0],best=null,bs=-Infinity;for(let p of PROFILES){let x=drawMainCandidate(draws,max,p,seed+p.name.length*997,previous);if(x.score>bs){bs=x.score;best=x;bestP=p}}if(kind==='euro'){let pool=starPool(draws), aux=auxScorePair(draws,'stars',pool,bestP);return{main:best.c,aux:aux.c,score:bs,profile:bestP.name}}else{return{main:best.c,aux:[dreamAux(draws)],score:bs,profile:bestP.name}}}
+function backtest(draws,kind){let max=kind==='euro'?50:40,start=Math.max(100,draws.length-60),res=PROFILES.map(p=>({name:p.name,tests:0,main:0,aux:0,exact:0}));for(let i=start;i<draws.length;i++){let train=draws.slice(0,i),actual=draws[i];for(let q=0;q<PROFILES.length;q++){let p=PROFILES[q],x=drawMainCandidate(train,max,p,i*9176+q*311,[]),mh=x.c.filter(n=>actual.numbers.includes(n)).length,ah=kind==='euro'?x.c.length*0+(actual.stars||[]).length*0:0;let aux=0;if(kind==='euro'){let pool=starPool(train),a=auxScorePair(train,'stars',pool,p).c;aux=a.filter(n=>(actual.stars||[]).includes(n)).length;if(mh===5&&aux===2)res[q].exact++}else{let a=dreamAux(train);aux=a===actual.dream?1:0;if(mh===6&&aux===1)res[q].exact++}res[q].main+=mh;res[q].aux+=aux;res[q].tests++}}for(let x of res){x.mainAvg=x.main/x.tests;x.auxAvg=x.aux/x.tests;x.composite=x.mainAvg+x.auxAvg}return{res,start}}
+function chooseBacktest(bt){return bt.res.slice().sort((a,b)=>b.composite-a.composite)[0]}
+function datesFor(kind){let days=kind==='euro'?[2,5]:[1,4],now=new Date(),out=[];for(let i=0;i<15&&out.length<2;i++){let x=new Date(now);x.setHours(0,0,0,0);x.setDate(now.getDate()+i);if(days.includes(x.getDay())){if(i===0){let c=new Date(now);c.setHours(21,0,0,0);if(now>c)continue}out.push(x)}}return out}
+function ncdf(z){let t=1/(1+.2316419*Math.abs(z)),p=1-.3989423*Math.exp(-z*z/2)*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?p:1-p}
+function hgVar(N,K,n){return n*(K/N)*(1-K/N)*(N-n)/(N-1)}
+function popW(n){let w=1;if(n<=12)w+=2.2;else if(n<=31)w+=1.1;if(n===7)w+=1.5;if(n%7===0)w+=.4;if(n%10===0)w+=.3;if(n>31)w-=.35;return Math.max(.1,w)}
+function crowdScore(c,drawnSet){let s=c.reduce((a,n)=>a+popW(n),0),d=[];for(let i=1;i<c.length;i++)d.push(c[i]-c[i-1]);if(new Set(d).size===1)s+=6;if(c.every(n=>n<=31))s+=4;if(new Set(c.map(n=>Math.floor((n-1)/10))).size<=2)s+=3;let f={};c.forEach(n=>f[n%10]=(f[n%10]||0)+1);if(Math.max(...Object.values(f))>=3)s+=2.5;if(drawnSet.has(c.join(',')))s+=8;return s}
+function antiCrowd(draws,max,seed){let r=rng(seed),best=null,bs=1e9,drawnSet=new Set(draws.map(d=>d.numbers.join(',')));for(let i=0;i<6000;i++){let pool=Array.from({length:max},(_,x)=>x+1);shuffle(pool,r);let c=pool.slice(0,max===50?5:6).sort((a,b)=>a-b),v=crowdScore(c,drawnSet)+r()*.01;if(v<bs){bs=v;best=c}}return{c:best,score:bs}}
+function antiCrowdAux(kind){if(kind==='euro'){let w={1:1.6,2:1.5,3:1.9,4:1.1,5:1.1,6:1.1,7:2.6,8:1.1,9:1.1,10:1.1,11:.9,12:.85};return[...Array(12)].map((_,i)=>i+1).sort((a,b)=>w[a]-w[b]).slice(0,2).sort((a,b)=>a-b)}let w={1:1.3,2:1.15,3:1.05,4:1,5:.9};return[1,2,3,4,5].sort((a,b)=>w[a]-w[b]).slice(0,1)}
+const COST={euro:2.5,dream:2.5};let GEN=[];
+function rnd32(){return crypto.getRandomValues(new Uint32Array(1))[0]}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function pickAux(kind){let r=rng(rnd32()),p=Array.from({length:kind==='euro'?12:5},(_,i)=>i+1);shuffle(p,r);return p.slice(0,kind==='euro'?2:1).sort((a,b)=>a-b)}
+const WD=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+function chi2p(x,df){let z=(Math.cbrt(x/df)-(1-2/(9*df)))/Math.sqrt(2/(9*df));return 1-ncdf(z)}
+function dayStats(draws,kind,w){let max=kind==='euro'?50:40,k=kind==='euro'?5:6,R=draws.filter(d=>new Date(d.date+'T12:00:00').getDay()===w),n=R.length,f=counts(R,n,max),e=n*k/max,sd=Math.sqrt(n*(k/max)*(1-k/max)),chi=0,all=Array.from({length:max},(_,i)=>i+1);for(let i=1;i<=max;i++)chi+=(f[i]-e)**2/e;let top=all.slice().sort((a,b)=>f[b]-f[a]),h=n>>1,fa=counts(R.slice(0,h),h,max),t10=all.slice().sort((a,b)=>fa[b]-fa[a]).slice(0,10),hits=R.slice(h).reduce((a,d)=>a+d.numbers.filter(x=>t10.includes(x)).length,0),eh=(n-h)*k*10/max,aux;if(kind==='euro'){aux=Array.from({length:12},(_,i)=>i+1).map(s=>{let o=R.reduce((a,d)=>a+(d.stars.includes(s)?1:0),0),x=R.reduce((a,d)=>a+(s<=euroStarPool(d.date)?2/euroStarPool(d.date):0),0);return{n:s,o,x,z:x?(o-x)/Math.sqrt(x):-9}}).sort((a,b)=>b.z-a.z)}else{aux=[1,2,3,4,5].map(s=>{let o=R.filter(d=>d.dream===s).length,x=n/5;return{n:s,o,x,z:(o-x)/Math.sqrt(x)}}).sort((a,b)=>b.z-a.z)}return{w,n,f,e,sd,chi,p:chi2p(chi,max-1),top,hits,eh,aux}}
+function renderDays(draws,kind,el){let days=kind==='euro'?[2,5]:[1,4],cls=kind==='euro'?'star':'dream';$(el).innerHTML='<div class="grid">'+days.map(w=>{let s=dayStats(draws,kind,w),dp=s.hits/s.eh*100-100;return '<div><div class="when"><b>'+WD[w]+'</b><span>'+s.n+' sorteios</span></div><div class="small">10 números que mais saíram</div>'+balls(s.top.slice(0,10),'sm')+'<div class="small">'+(kind==='euro'?'Estrelas':'Dream')+' que mais saíram</div>'+balls(s.aux.slice(0,kind==='euro'?4:2).map(a=>a.n),'sm '+cls)+'<div class="metric"><span>É um padrão real?</span><b class="'+(s.p<.05?'warn':'')+'">'+(s.p<.05?'Possível desvio':'Não — variação normal do acaso')+'</b></div><div class="metric"><span>Funcionou no passado?</span><b>'+(dp>=0?'+':'')+dp.toFixed(1)+'% vs acaso</b></div></div>'}).join('')+'</div><div class="small" style="margin-top:12px">Testámos se os números mais saídos num dia continuaram a sair mais depois. As diferenças são do tamanho que o acaso produz.</div>'}
+function hotLine(kind,w){let draws=kind==='euro'?E:D,s=dayStats(draws,kind,w),r=rng(rnd32()),pool=s.top.slice(0,15);shuffle(pool,r);let ap=s.aux.slice(0,kind==='euro'?4:2).map(a=>a.n);shuffle(ap,r);return{main:pool.slice(0,kind==='euro'?5:6).sort((a,b)=>a-b),aux:ap.slice(0,kind==='euro'?2:1).sort((a,b)=>a-b)}}
+function genLines(kind,n,used,w){let draws=kind==='euro'?E:D,max=kind==='euro'?50:40,hot=$('hotDay').checked,out=[],tries=0;while(out.length<n&&tries++<5000){let l=hot?hotLine(kind,w):{main:antiCrowd(draws,max,rnd32()).c,aux:pickAux(kind)},k=l.main.join(',')+'|'+l.aux.join(',');if(!used.has(k)){used.add(k);out.push(l)}}return out}
+function genAll(){let n=Math.max(1,Math.min(50,Math.floor(+$('nLines').value)||1)),html='<div class="games">';$('nLines').value=n;GEN=[];$('saveMsg').textContent='';for(let kind of['euro','dream']){let used=new Set(),cls=kind==='euro'?'star':'dream';html+='<div class="game '+kind+'"><div class="game-h"><h2>'+(kind==='euro'?'Euromilhões':'EuroDreams')+'</h2><span class="small">'+(kind==='euro'?'5 números + 2 estrelas':'6 números + 1 Dream')+'</span></div>';for(let d of datesFor(kind)){let ls=genLines(kind,n,used,d.getDay());ls.forEach(l=>GEN.push({kind,date:iso(d),main:l.main,aux:l.aux}));html+='<div class="draw"><div class="when"><b>'+d.toLocaleDateString('pt-PT',{weekday:'long'})+'</b><span>'+fmt(d)+'</span></div>'+ls.map(l=>'<div class="line">'+balls(l.main)+balls(l.aux,cls)+'</div>').join('')+'</div>'}html+='</div>'}html+='</div><div class="summary">'+GEN.length+' apostas · €'+GEN.reduce((a,b)=>a+COST[b.kind],0).toFixed(2)+' no total · nenhuma linha se repete'+($('hotDay').checked?' · com os números mais saídos de cada dia':' · evitando as combinações mais jogadas')+'</div>';$('genOut').innerHTML=html}
+function loadBets(){try{return JSON.parse(localStorage.getItem('apostas')||'[]')}catch(e){return[]}}
+function saveBets(b){localStorage.setItem('apostas',JSON.stringify(b))}
+function tierEuro(m,s){const T=['5+2','5+1','5+0','4+2','4+1','3+2','4+0','2+2','3+1','3+0','1+2','2+1','2+0'];let i=T.indexOf(m+'+'+s);return i<0?null:(i===0?'JACKPOT! ':'')+(i+1)+'º prémio ('+m+' núm. + '+s+' estr.)'}
+function tierDream(m,a){if(m===6&&a)return'1º PRÉMIO! €20.000/mês durante 30 anos';if(m===6)return'2º prémio — €2.000/mês durante 5 anos';const T={5:'3º',4:'4º',3:'5º',2:'6º'};return T[m]?T[m]+' prémio ('+m+' números)':null}
+function checkBet(b){let d=(b.kind==='euro'?E:D).find(x=>x.date===b.date);if(!d)return{pending:true};let m=b.main.filter(n=>d.numbers.includes(n)).length;if(b.kind==='euro'){let s=b.aux.filter(n=>d.stars.includes(n)).length;return{m,a:s,tier:tierEuro(m,s)}}let a=b.aux[0]===d.dream?1:0;return{m,a,tier:tierDream(m,a)}}
+function betTicket(b){let cls=b.kind==='euro'?'star':'dream';return'<div class="ticket '+b.kind+'">'+b.main.map(n=>'<span class="ball sm">'+n+'</span>').join('')+b.aux.map(n=>'<span class="ball sm '+cls+'">'+n+'</span>').join('')+'</div>'}
+function renderBets(){let bets=loadBets(),spent=0,wins=0,pend=0;let rows=bets.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(b=>{spent+=COST[b.kind];let r=checkBet(b);if(r.pending)pend++;else if(r.tier)wins++;let st=r.pending?'<span class="badge wait">A aguardar sorteio</span>':r.tier?'<span class="badge win">'+r.tier+'</span>':'<span class="badge">'+r.m+(b.kind==='euro'?' + '+r.a:'')+' certos · sem prémio</span>';return'<div class="bet"><span class="gpill '+b.kind+'">'+(b.kind==='euro'?'Euromilhões':'EuroDreams')+'</span><span class="small">'+fmt(b.date)+'</span>'+betTicket(b)+st+'</div>'}).join('');$('betList').innerHTML=bets.length?rows:'<div class="empty">Ainda não guardaste apostas.<br>Vai a <b>Chaves</b> e carrega em <b>Guardar como jogadas</b>.</div>';$('betSpend').innerHTML='<div class="kpi"><span>Apostas</span><b>'+bets.length+'</b></div><div class="kpi"><span>Total gasto</span><b>€'+spent.toFixed(2)+'</b></div><div class="kpi"><span>A aguardar</span><b>'+pend+'</b></div><div class="kpi"><span>Com prémio</span><b class="'+(wins?'ok':'')+'">'+wins+'</b></div>'}
+function renderPrediction(el,x,date,kind){let auxClass=kind==='euro'?'star':'dream';$(el).innerHTML='<div class="tag">'+date+'</div>'+balls(x.main)+balls(x.aux,auxClass)+'<div class="small">Estratégia: '+x.profile+' • score '+x.score.toFixed(2)+'</div>'}
+function renderGame(draws,kind,pre,validation,statsEl,hotEl,coldEl,auxEl,lastEl,acEl){let max=kind==='euro'?50:40,last=draws.at(-1),bt=backtest(draws,kind),chosen=chooseBacktest(bt),dates=datesFor(kind),a=predict(draws,kind,Date.now()%100000+11,[]),b=predict(draws,kind,Date.now()%100000+23,a.main),s=featureStats(draws,max),vec=numberScoreVector(s,draws,max).sort((a,b)=>b.score-a.score),g=gaps(draws,max),cold=Array.from({length:max},(_,i)=>({n:i+1,g:g[i+1]})).sort((a,b)=>b.g-a.g);renderPrediction(pre+'Next',a,fmt(dates[0]),kind);renderPrediction(pre+'Next2',b,fmt(dates[1]),kind);$(lastEl).innerHTML='<b>'+fmt(last.date)+'</b><div class="small">Sorteio '+(last.draw||'')+'</div>'+balls(last.numbers)+(kind==='euro'?balls(last.stars,'star'):balls([last.dream],'dream'));let baseMain=kind==='euro'?0.5:0.9,baseAux=kind==='euro'?1/3:0.2,vM=kind==='euro'?hgVar(50,5,5):hgVar(40,6,6);$(validation).innerHTML='<table class="table"><tr><th>Estratégia</th><th>Testes</th><th>Acertos principais</th><th>Auxiliar</th><th>Exato</th><th>vs acaso (z · p)</th></tr>'+bt.res.map(x=>{let zm=(x.main-x.tests*baseMain)/Math.sqrt(x.tests*vM);return '<tr><td>'+x.name+(x.name===chosen.name?' ★':'')+'</td><td>'+x.tests+'</td><td>'+x.mainAvg.toFixed(3)+'</td><td>'+x.auxAvg.toFixed(3)+'</td><td>'+x.exact+'</td><td class="'+(zm>=1.645?'ok':'muted')+'">'+zm.toFixed(2)+' · '+(1-ncdf(zm)).toFixed(3)+'</td></tr>'}).join('')+'</table><div class="small">Baseline aleatório: principais '+baseMain.toFixed(3)+' • '+(kind==='euro'?'estrelas':'Dream')+' '+baseAux.toFixed(3)+' por aposta. Walk-forward: cada teste usa apenas sorteios anteriores. z·p: teste de significância unilateral — só supera o acaso se z≥1,65 (p≤0,05).</div>';$(statsEl).innerHTML='<div class="metric"><span>Sorteios válidos</span><b>'+draws.length+'</b></div><div class="metric"><span>Período</span><b>'+fmt(draws[0].date)+' → '+fmt(last.date)+'</b></div><div class="metric"><span>Universo principal</span><b>1–'+max+'</b></div><div class="metric"><span>Combinações base</span><b>'+ (kind==='euro'?'139.838.160':'3.838.380')+'</b></div><div class="metric"><span>Estratégia escolhida pelo walk-forward</span><b>'+chosen.name+'</b></div>';let fr=counts(draws,draws.length,max),hotN=Array.from({length:max},(_,i)=>i+1).sort((a,b)=>fr[b]-fr[a]).slice(0,10);$(hotEl).innerHTML='<div class="chips">'+hotN.map(n=>'<div class="chip"><span class="ball">'+n+'</span><small>'+fr[n]+'×</small></div>').join('')+'</div><div class="small" style="margin-top:12px">Vezes que saiu em '+draws.length+' sorteios.</div>';$(coldEl).innerHTML='<div class="chips">'+cold.slice(0,10).map(x=>'<div class="chip"><span class="ball">'+x.n+'</span><small>'+x.g+' sorteios</small></div>').join('')+'</div><div class="small" style="margin-top:12px">Sorteios desde a última vez que saiu.</div>';if(kind==='euro'){let pool=starPool(draws),sv=starFeatures(draws,pool).v.sort((a,b)=>b.score-a.score);$(auxEl).innerHTML='<div class="metric"><span>Universo atual</span><b>1–'+pool+'</b></div>'+sv.map((x,i)=>'<span class="pill">'+x.n+' · '+x.score.toFixed(2)+'</span>').join('')+'<div class="small">A pontuação das estrelas é calculada separadamente e normaliza a frequência pela exposição real de cada estrela em cada era (9 → 11 → 12).</div>'}else{$(auxEl).innerHTML=Array.from({length:5},(_,i)=>i+1).map(n=>'<span class="pill">Dream '+n+'</span>').join('')+'<div class="small">Dream Number é modelado separadamente como variável 1–5.</div>'}}
+const SRC='https://raw.githubusercontent.com/hmiguel/jsc-history/main/';let SIG='',LASTCHK=0,ONLINE=true;
+async function getText(file){try{let r=await fetch(SRC+file+'?t='+Date.now(),{cache:'no-store'});if(r.ok)return await r.text()}catch(e){}ONLINE=false;return(await fetch(file+'?'+Date.now())).text()}
+function hm(d){return d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}
+async function notify(body){if(!('Notification' in window)||Notification.permission!=='granted')return;try{let reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)return reg.showNotification('Loterias Analyzer',{body,icon:'icon-192.png'});new Notification('Loterias Analyzer',{body})}catch(e){}}
+async function load(auto=false){
+ try{
+  ONLINE=true;LASTCHK=Date.now();
+  const [et,dt]=await Promise.all([getText('euromillions.jsonl'),getText('eurodreams.jsonl')]);
+  const eraw=et.trim().split(/\n+/).map(JSON.parse);
+  const draw=dt.trim().split(/\n+/).map(JSON.parse);
+  const ev=validateEuro(eraw),dv=validateDream(draw);
+  const nE=ev.good.sort((a,b)=>a.date.localeCompare(b.date)),nD=dv.good.sort((a,b)=>a.date.localeCompare(b.date));
+  if(nE.length<100||nD.length<100) throw Error('histórico insuficiente');
+  const sig=nE.length+'|'+nE.at(-1).date+'|'+nD.length+'|'+nD.at(-1).date,changed=sig!==SIG,isNew=auto&&changed;
+  const st=(ONLINE?'● Atualizado às ':'● Sem internet · dados de ')+hm(new Date())+' · último sorteio EM '+fmt(nE.at(-1).date).slice(0,5)+' · ED '+fmt(nD.at(-1).date).slice(0,5);
+  if(!changed){$('status').textContent=st;return}
+  SIG=sig;E=nE;D=nD;
+  $('status').innerHTML=(isNew?'<b class="ok">🔔 Novo resultado recebido! </b>':'')+st;
+  if(isNew)notify('Novo resultado: EM '+fmt(E.at(-1).date)+' • ED '+fmt(D.at(-1).date));
+  genAll();renderBets();
+  $('btnGen').onclick=genAll;
+  await new Promise(r=>setTimeout(r,50));
+  renderGame(E,'euro','e','eVal','eStats','eHot','eCold','eStars','eLast','eAC');
+  await new Promise(r=>setTimeout(r,20));
+  renderGame(D,'dream','d','dVal','dStats','dHot','dCold','dDream','dLast','dAC');
+  renderDays(E,'euro','eDay');renderDays(D,'dream','dDay');
+  $('btnSave').onclick=()=>{let bets=loadBets(),keys=new Set(bets.map(b=>b.kind+b.date+b.main+'|'+b.aux)),add=GEN.filter(g=>!keys.has(g.kind+g.date+g.main+'|'+g.aux));saveBets(bets.concat(add));renderBets();$('saveMsg').textContent='✓ '+add.length+' apostas guardadas'};
+  $('btnClear').onclick=()=>{if(confirm('Apagar todo o histórico de apostas?')){saveBets([]);renderBets()}};
+  $('audit').innerHTML=`<div class="metric"><span>Euromilhões — inválidos descartados</span><b>${ev.bad}</b></div><div class="metric"><span>Euromilhões — duplicados</span><b>${ev.dupes}</b></div><div class="metric"><span>EuroDreams — inválidos descartados</span><b>${dv.bad}</b></div><div class="metric"><span>EuroDreams — duplicados</span><b>${dv.dupes}</b></div><div class="metric"><span>Estrelas EM</span><b>9 → 11 → 12, por era</b></div><div class="metric"><span>Datas</span><b>calculadas a partir do relógio atual, não do último resultado</b></div><div class="metric"><span>Estrelas/Dream</span><b>modelo separado dos números principais</b></div>`;
+ }catch(e){
+  $('status').innerHTML=SIG?'<span class="warn">Não foi possível verificar novos resultados às '+hm(new Date())+' — a mostrar os últimos dados. Nova tentativa em 15 min.</span>':'<span class="bad">Erro ao carregar/calcular: '+e.message+'</span>';
+ }
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>{x.classList.toggle('active',x===b);$(x.dataset.v).classList.toggle('hidden',x!==b)})});
+$('plus').onclick=()=>{$('nLines').value=Math.min(50,(+$('nLines').value||1)+1);if(E.length)genAll()};$('minus').onclick=()=>{$('nLines').value=Math.max(1,(+$('nLines').value||1)-1);if(E.length)genAll()};$('nLines').onchange=()=>{if(E.length)genAll()};$('hotDay').onchange=()=>{if(E.length)genAll()};
+$('tEuro').onclick=()=>{$('euro').classList.remove('hidden');$('dream').classList.add('hidden');$('tEuro').classList.add('active');$('tDream').classList.remove('active')};$('tDream').onclick=()=>{$('dream').classList.remove('hidden');$('euro').classList.add('hidden');$('tDream').classList.add('active');$('tEuro').classList.remove('active')};load();
+setInterval(()=>load(true),15*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-LASTCHK>5*60*1000)load(true)});
+if('Notification' in window&&Notification.permission==='default')document.addEventListener('click',()=>Notification.requestPermission(),{once:true});
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js');
+</script></body></html>
