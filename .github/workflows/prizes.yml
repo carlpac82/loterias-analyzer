@@ -1,0 +1,31 @@
+name: Atualizar prémios e M1lhão
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 22,23 * * *'   # logo após os sorteios (~21h-22h PT)
+    - cron: '30 5,11 * * *'    # manhã seguinte e meio do dia
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python scripts/scrape_prizes.py
+      - name: Guardar alterações
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prizes-euromilhoes.jsonl prizes-eurodreams.jsonl m1lhao.jsonl 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Sem dados novos."
+          else
+            git commit -m "chore: prémios e M1lhão atualizados"
+            git push
+          fi
