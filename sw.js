@@ -1,4 +1,4 @@
-const CACHE = 'loterias-v5';
+const CACHE = 'loterias-v6';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'Loterias_Analyzer_Icon.png', 'euromillions.jsonl', 'eurodreams.jsonl', 'prizes-euromilhoes.jsonl', 'prizes-eurodreams.jsonl', 'm1lhao.jsonl'];
 
 self.addEventListener('install', e => {
